@@ -1,0 +1,156 @@
+from flask import Flask, render_template, request
+from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
+from chatterbot.trainers import ListTrainer
+
+app = Flask(__name__)
+
+
+
+chatbot = ChatBot("Erika",
+        storage_adapter="chatterbot.storage.SQLStorageAdapter",
+        database_uri="sqlite:///erikaTraining.sqlite3",
+        preprocessors=[
+            "chatterbot.preprocessors.clean_whitespace"
+        ],
+        logic_adapters=[
+            {
+                "import_path": "chatterbot.logic.BestMatch",
+                "default_response": "I am sorry, but I do not understand what you are saying.",
+                "maximum_similarity_threshold": 0.90
+            },
+
+
+        ]
+)
+
+def train(bot):
+    trainer = ListTrainer(bot)
+    trainer.train([
+        "Hi",
+        "Hello, my name is Erika. How are you feeling today?",
+        "I am doing fine",
+        "Is everything going well in your life?"
+    ])
+    trainer.train([
+        "Hello",
+        "Hello, my name is Erika. How are you feeling today? Neutral, good, bad?" ,
+    ])
+    trainer.train([
+        "Good",
+        "Great. Is everything going well in your life?"
+    ])
+    trainer.train([
+        "Bad",
+        "I'm sorry to hear. Is everything going well in your life?"
+    ])
+    trainer.train([
+        "Neutral",
+        "Is everything going well in your life?"
+    ])
+    trainer.train([
+        "It is not great",
+        "I am your Empathecticly Reciprocating Intelligent Konnection Agent, or Erika for short. Remember, I am not a counselor, but I will do my best to make you feel better.If you are in immediate danger, please call 911 or reach out to a local helpline here: https://www.nami.org/help. If you need professional help reach out to a local helpline here: https://www.nami.org/help. Would you like some tips to relax and reconnect with your body and mind?",
+        "Yes",
+        "Great to hear. One of the first ways to be more connected with yourself to focus on your breath. Take a long, deep breath... As you breath, let your mind be free of repetitive or negative thoughts. How do you feel? A little better or not better",
+    ])
+    trainer.train([
+        'Not better',
+        "I am sorry that didn't help. Let's try to do another exercise and see if it is benefical for you. It's called the Body scan. This technique is to help relax the muscles in your body. Continue your breath focus and go from muscle to muscle on your body releasing physical tension in that muscle. It's all about being aware of the mind and body connection. After let me know, Have you released any tension in the body? Less tension or the same tension",
+    ])
+    trainer.train([
+        "A little better",
+        "Good job. Let's try another exercise. It's called the Body scan. This technique is to help relax the muscles in your body. Continue your breath focus and go from muscle to muscle on your body releasing physical tension in that muscle. It's all about being aware of the mind and body connection. After let me know, Have you released any tension in the body? Less tension or the same tension",
+    ])
+    trainer.train([
+        "Same tension",
+        "I'm sorry to hear that. Let's try another technique and see if it helps. It's called guided imagery. I would like you to close your eyes and think of a calm place or a place you would find peace. Think of a scene that you personally relate to and let your mind wander in that place. Let me know how are you feeling after.. I'll wait here. Better, worse, same?",
+    ])
+    trainer.train([
+        "Less tension",
+        "That is a very important step leading to the the guided imagery. I would like you to close your eyes and think of a calm place or a place you would find peace. Think of a scene that you personally relate to and let your mind wander in that place. Let me know how are you feeling after.. I'll wait here. Better, worse, same?"
+    ])
+    trainer.train([
+        "Better",
+        "Glad to hear, I'm here to help. So do have days that you feel depressed, anxious, or both? "
+    ])
+    trainer.train([
+        "Worse",
+        "I'm sorry. Let's try to improve your mood. Do have days that you feel depressed, anxious, or both? "
+    ])
+    trainer.train([
+        "Same",
+        "It's okay to feel about the same. But let's try to dig a little deeper to understand what can help. Do have days that you feel depressed, anxious, or both? "
+    ])
+    trainer.train([
+        "Depressed",
+        "There's a lot of people that deal with depression. You are not alone. You can get through this and find ways to cope. Let's talk about it.\n  Are you active or not active"
+    ])
+
+    trainer.train([
+        "Active",
+        "Great. Working out or being active in general is so good for coping with depression. Try new workout plans, plan a hike to a new place, pick a new active hobby like mountain biking, or anything that might interest you.\n "
+    ])
+    trainer.train([
+        "Not active",
+        "How about we consider adding some activity into your daily routine? How intense would you like your work to be? Intense, moderate, or relaxed?"
+    ])
+    trainer.train([
+        "Intense",
+        "How about picking up some weights? Lifting weights can build muscle, burn body fat, and even strengthen your joints."
+    ])
+    trainer.train([
+        "Moderate",
+        "Would you perhaps enjoy a job around the neighborhood? It can help you lose weight, strengthen your muscles, improve your cardiovascular fitness, and even give you a new perspective on life!"
+    ])
+    trainer.train([
+        "Relaxed",
+        "Maybe every morning you can talk a walk around the block? If you have a dog, it might be even easier. I do love dogs personally, but what do you prefer? Dogs or cats?"
+    ])
+    trainer.train([
+        "Dogs",
+        "Fun fact about dogs, they are really well known for their high emotional intelligence. Some can even detect how their owner feels as well. But how are you feeling right now? Good, bad, or Neutral?"
+    ])
+    trainer.train([
+        "Cats",
+        "Did you know that cats, unlike dogs, are known for their high logical intelligence and problem solving skills? Maybe if they worked hard enough they could help my friends who made me! Speaking of friends, how many close friends do you have? A few close friends? Lots of close friends? A little lonely?"
+    ])
+    trainer.train([
+        "Lots of close friends",
+        "That's fantastic! It's really awesome to be surrounded by people that support you and want what is best for you!"
+    ])
+    trainer.train([
+        "A few close friends",
+        "Sometimes, having just a few people you can be in touch with makes all the difference."
+    ])
+    trainer.train([
+        "A little lonely",
+        "I'm sorry to hear that, it can be tough to make friends sometimes."
+    ])
+    trainer.train([
+        "Anxious",
+        "There's a lot of people that deal with anxiety. You are not alone."
+    ])
+    trainer.train([
+        "Both",
+        "Theres a lot people that deal with depression and anxiety. You are not alone."
+    ])
+    trainer.train([
+        "Bye",
+        "Thanks for talking. If you need professional help reach out to a local helpline here: https://www.nami.org/help. You are not alone. Come back anytime"
+    ])
+
+train(chatbot)
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route("/get")
+def get_bot_response():
+    userText = request.args.get('msg')
+    return str(chatbot.get_response(userText))
+
+
+if __name__ == "__main__":
+    app.run()
